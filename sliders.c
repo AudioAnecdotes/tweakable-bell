@@ -48,7 +48,9 @@ sliders_create(const char* dev_path, int baud_rate)
 		goto bail;
 	}
 
-	ret->fd = open(dev_path,O_RDWR|O_NOCTTY|O_NDELAY);
+	// We need O_NONBLOCK here because otherwise
+	// the call to open() itself might block. Let's prevent that.
+	ret->fd = open(dev_path,O_RDWR|O_NOCTTY|O_NONBLOCK);
 
 	if(ret->fd<0) {
 		perror(dev_path);
@@ -57,7 +59,8 @@ sliders_create(const char* dev_path, int baud_rate)
 		goto bail;
 	}
 
-	fcntl(ret->fd, F_SETFL, 0);
+	// Turn off O_NONBLOCK.
+	fcntl(ret->fd, F_SETFL, fcntl(ret->fd, F_GETFL)&~O_NONBLOCK);
 
 	if(tcgetattr(ret->fd, &t) < 0) {
 		perror("sliders_create:tcgetattr");
@@ -70,15 +73,8 @@ sliders_create(const char* dev_path, int baud_rate)
 
 	cfmakeraw(&t);
 
-	if(cfsetospeed(&t, baud_rate)<0) {
-		perror("sliders_create:cfsetospeed");
-		sliders_release(ret);
-		ret = NULL;
-		goto bail;
-	}
-
-	if(cfsetispeed(&t, baud_rate)<0) {
-		perror("sliders_create:cfsetispeed");
+	if(cfsetspeed(&t, baud_rate)<0) {
+		perror("sliders_create:cfsetspeed");
 		sliders_release(ret);
 		ret = NULL;
 		goto bail;

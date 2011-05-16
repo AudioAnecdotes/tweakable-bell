@@ -22,8 +22,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define SLIDERS_MIN_VALUE		(sliders_value_t)(0x8000)
-#define SLIDERS_MAX_VALUE		(sliders_value_t)(0x7FFF)
+#define SLIDERS_MIN_VALUE		(sliders_value_t)(-1024)
+#define SLIDERS_MAX_VALUE		(sliders_value_t)(1023)
 
 #define SLIDERS_COUNT			(30)
 
