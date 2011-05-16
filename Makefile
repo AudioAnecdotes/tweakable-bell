@@ -2,6 +2,7 @@
 ### Variables
 
 OBJECTS = main.o sliders.o
+CFLAGS = -g -std=c99 -Os
 
 ### Phony Targets
 
