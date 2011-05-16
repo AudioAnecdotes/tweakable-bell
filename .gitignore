@@ -3,3 +3,5 @@
 *.swp
 tweakable-bell
 xcuserdata
+*.BAK
+*~
