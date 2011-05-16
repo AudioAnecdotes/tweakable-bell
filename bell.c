@@ -1,6 +1,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 
 #include <pablio.h>
 
@@ -53,9 +55,9 @@ static struct termios Otty, Ntty;
 void
 allocateArrays(int nf, int np)
 {
-	f = new float[nf];
-	d = new float[nf];
-	a = new float[np * nf];
+	f = (float*)malloc(sizeof(float)*nf);
+	d = (float*)malloc(sizeof(float)*nf);
+	a = (float*)malloc(sizeof(float)*nf*np);
 	fscale = dscale = ascale = 1.f;
 };
 
@@ -171,12 +173,12 @@ dampResonators(double damping)
 void
 allocateData(int nf, int np)
 {
-	R2 = new float[nf];
-	twoRCosTheta = new float[nf];
-	yt_1 = new float[nf];
-	yt_2 = new float[nf];
-	c_i = new float[nf];
-	ampR = new float[nf];
+	R2 = (float*)malloc(sizeof(float)*nf);
+	twoRCosTheta = (float*)malloc(sizeof(float)*nf);
+	yt_1 = (float*)malloc(sizeof(float)*nf);
+	yt_2 = (float*)malloc(sizeof(float)*nf);
+	c_i = (float*)malloc(sizeof(float)*nf);
+	ampR = (float*)malloc(sizeof(float)*nf);
 	clearHistory();
 }
 
@@ -366,7 +368,6 @@ main(int argc, char *argv[])
 	else
 		bufferSize = 10;
 
-	// float *buffer = new float[bufferSize];
 	float *buffer = (float *)malloc(bufferSize * sizeof(float));
 
 	printf("nactive_freq: %d\n", nfUsed);
@@ -396,7 +397,7 @@ main(int argc, char *argv[])
 	float dur = .0002f;			// 2 ms
 	int nsamples = (int)(srate * dur);
 	printf("nsamples: %d\n", nsamples);
-	float *cosForce = new float[bufferSize];
+	float *cosForce = (float*)malloc(sizeof(float)*bufferSize);
 	memset(cosForce, 0, bufferSize * sizeof(float));
 	for (int i = 0; i < nsamples; i++) {
 		cosForce[i] =

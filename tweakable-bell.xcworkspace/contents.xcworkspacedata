@@ -2,6 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
+      location = "group:bell.c">
+   </FileRef>
+   <FileRef
       location = "group:Makefile">
    </FileRef>
    <FileRef
