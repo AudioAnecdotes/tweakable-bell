@@ -19,7 +19,7 @@ run: tweakable-bell
 ### Actual Targets
 
 tweakable-bell: $(OBJECTS)
-	$(CC) -o $@ $<
+	$(CC) -o $@ $^
 
 ### Dependencies
 
