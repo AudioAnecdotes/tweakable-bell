@@ -55,9 +55,9 @@ static struct termios Otty, Ntty;
 void
 allocateArrays(int nf, int np)
 {
-	f = (float*)malloc(sizeof(float)*nf);
-	d = (float*)malloc(sizeof(float)*nf);
-	a = (float*)malloc(sizeof(float)*nf*np);
+	f = (float *)malloc(sizeof(float) * nf);
+	d = (float *)malloc(sizeof(float) * nf);
+	a = (float *)malloc(sizeof(float) * nf * np);
 	fscale = dscale = ascale = 1.f;
 };
 
@@ -173,12 +173,12 @@ dampResonators(double damping)
 void
 allocateData(int nf, int np)
 {
-	R2 = (float*)malloc(sizeof(float)*nf);
-	twoRCosTheta = (float*)malloc(sizeof(float)*nf);
-	yt_1 = (float*)malloc(sizeof(float)*nf);
-	yt_2 = (float*)malloc(sizeof(float)*nf);
-	c_i = (float*)malloc(sizeof(float)*nf);
-	ampR = (float*)malloc(sizeof(float)*nf);
+	R2 = (float *)malloc(sizeof(float) * nf);
+	twoRCosTheta = (float *)malloc(sizeof(float) * nf);
+	yt_1 = (float *)malloc(sizeof(float) * nf);
+	yt_2 = (float *)malloc(sizeof(float) * nf);
+	c_i = (float *)malloc(sizeof(float) * nf);
+	ampR = (float *)malloc(sizeof(float) * nf);
 	clearHistory();
 }
 
@@ -211,8 +211,8 @@ computeFilter()
     @param output provided output buffer.
 */
 double
-computeSoundBuffer(float *output, float *force, int nsamples, bool doPlot,
-				   int numResonators)
+computeSoundBuffer(float *output,
+	float *force, int nsamples, bool doPlot, int numResonators)
 {
 	static unsigned plotCount = 0;
 	double total = 0.0;
@@ -291,7 +291,8 @@ cleanup()
 #define min(x, y) (x<y)?x:y
 
 int
-main(int argc, char *argv[])
+main(int argc, char *argv[]
+	)
 {
 	// int bufferSize = 4096;
 	int bufferSize = 10;
@@ -397,7 +398,7 @@ main(int argc, char *argv[])
 	float dur = .0002f;			// 2 ms
 	int nsamples = (int)(srate * dur);
 	printf("nsamples: %d\n", nsamples);
-	float *cosForce = (float*)malloc(sizeof(float)*bufferSize);
+	float *cosForce = (float *)malloc(sizeof(float) * bufferSize);
 	memset(cosForce, 0, bufferSize * sizeof(float));
 	for (int i = 0; i < nsamples; i++) {
 		cosForce[i] =
@@ -445,8 +446,7 @@ main(int argc, char *argv[])
 				for (int i = 0; i < nsamples; i++)
 					cosForce[i] =
 						(float)(.5 *
-								(1. -
-								 cos(2 * M_PI * (i + 1) / (1 + nsamples))));
+						(1. - cos(2 * M_PI * (i + 1) / (1 + nsamples))));
 				break;
 
 			case 'q':
@@ -485,7 +485,7 @@ main(int argc, char *argv[])
 		}
 		total =
 			computeSoundBuffer(buffer, cosForce, bufferSize, doPlot,
-							   numResonators);
+			numResonators);
 		if (doImpulse && (total < 0.0001)) {
 			done = true;
 			printf("total = %f\n", total);

@@ -131,8 +131,8 @@ sliders_process(sliders_t self)
 	int i;
 
 	bytes_read = read(self->fd,
-					  self->buffer + self->buffer_size,
-					  SLIDERS_BUFFER_SIZE - self->buffer_size);
+		self->buffer + self->buffer_size,
+		SLIDERS_BUFFER_SIZE - self->buffer_size);
 
 	if (bytes_read < 0) {
 		ret = SLIDERS_STATUS_ERRNO;
@@ -152,7 +152,7 @@ sliders_process(sliders_t self)
 			if (self->buffer_size - 1 <= i)
 				break;
 			fprintf(stderr, "sliders_process: Slave '%c' failure\n",
-					self->buffer[i + 1]);
+				self->buffer[i + 1]);
 			//write(self->fd,"R",1);
 			i++;
 		} else if (isdigit(c) || ((c >= 'a') && (c <= 'f'))) {
@@ -166,7 +166,7 @@ sliders_process(sliders_t self)
 
 			if (slider_index >= SLIDERS_COUNT) {
 				fprintf(stderr, "sliders_process: Bad slider index %d\n",
-						slider_index);
+					slider_index);
 			} else {
 				self->buffer[i + 7] = 0;
 				self->values[slider_index] =
@@ -175,8 +175,7 @@ sliders_process(sliders_t self)
 
 			if (self->callback) {
 				(*self->callback) (self->callback_context,
-								   self,
-								   slider_index, self->values[slider_index]
+					self, slider_index, self->values[slider_index]
 					);
 			}
 
@@ -200,8 +199,8 @@ bail:
 }
 
 void
-sliders_set_callback(sliders_t self, sliders_changed_callback_t callback,
-					 void *context)
+sliders_set_callback(sliders_t self,
+	sliders_changed_callback_t callback, void *context)
 {
 	self->callback = callback;
 	self->callback_context = context;

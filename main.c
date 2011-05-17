@@ -20,13 +20,13 @@
 #endif
 
 void
-sliders_changed_callback(void *context, sliders_t sliders, int slider_index,
-						 sliders_value_t value)
+sliders_changed_callback(void *context,
+	sliders_t sliders, int slider_index, sliders_value_t value)
 {
 	printf("%d: %0.01f%%\n", slider_index,
-		   100.0 * ((float)value -
-					(float)SLIDERS_MIN_VALUE) / ((float)SLIDERS_MAX_VALUE -
-												 (float)SLIDERS_MIN_VALUE));
+		100.0 * ((float)value -
+			(float)SLIDERS_MIN_VALUE) / ((float)SLIDERS_MAX_VALUE -
+			(float)SLIDERS_MIN_VALUE));
 }
 
 bool gDidGetInterrupt;
@@ -42,7 +42,8 @@ received_interrupt(int unused)
 }
 
 int
-main(void)
+main(void
+	)
 {
 	int ret = 1;
 
@@ -85,7 +86,7 @@ main(void)
 		FD_SET(gInterruptFDs[0], &exceptfs);
 
 		select(MAX(fd, gInterruptFDs[0]) + 1, &readfs, NULL, &exceptfs,
-			   &timeout);
+			&timeout);
 
 		if (FD_ISSET(gInterruptFDs[0], &readfs)) {
 			break;
