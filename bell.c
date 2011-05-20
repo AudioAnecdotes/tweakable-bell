@@ -284,8 +284,19 @@ computeSoundBuffer(float *output,
 void
 cleanup()
 {
-	tcsetattr(0, TCSANOW, &Otty);
 	exit(0);
+}
+
+void
+received_interrupt(int unused)
+{
+	cleanup();
+}
+
+void
+cleanup_tty()
+{
+	tcsetattr(0, TCSANOW, &Otty);
 }
 
 #define min(x, y) (x<y)?x:y
@@ -352,16 +363,17 @@ main(int argc, char *argv[]
 		int status;
 
 		tcgetattr(0, &Otty);
+		signal(SIGINT, &received_interrupt);
 		Ntty = Otty;
 
-		Ntty.c_lflag = 0;		// line settings (no echo)
-		Ntty.c_lflag = 0;		// line settings (no echo)
+		Ntty.c_lflag = ISIG|ECHONL;		// line settings (no echo)
 
 		Ntty.c_cc[VMIN] = 0;	// minimum time to wait
 		Ntty.c_cc[VTIME] = 0;	// minimum characters to wait for
 		status = tcsetattr(0, TCSANOW, &Ntty);
 		if (status)
 			fprintf(stderr, "tcsetattr returned %d\n", status);
+		atexit(&cleanup_tty);
 	}
 
 	if (doImpulse)
