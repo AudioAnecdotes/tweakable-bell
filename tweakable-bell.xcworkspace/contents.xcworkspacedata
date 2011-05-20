@@ -5,6 +5,9 @@
       location = "group:bell.c">
    </FileRef>
    <FileRef
+      location = "group:bell.h">
+   </FileRef>
+   <FileRef
       location = "group:Makefile">
    </FileRef>
    <FileRef

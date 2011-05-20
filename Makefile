@@ -1,7 +1,7 @@
 
 ### Variables
 
-OBJECTS = main.o sliders.o
+OBJECTS = main.o sliders.o bell.o
 
 CFLAGS = -g -std=c99 -Os
 
@@ -44,5 +44,6 @@ tweakable-bell: $(OBJECTS)
 
 ### Dependencies
 
-main.o: main.c main.h sliders.h
+main.o: main.c main.h sliders.h bell.h
 sliders.o: sliders.c sliders.h
+bell.o: bell.c bell.h
