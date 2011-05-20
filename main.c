@@ -35,16 +35,23 @@ sliders_changed_callback(
 	double value = ((float)v -
 	        (float)SLIDERS_MIN_VALUE) / ((float)SLIDERS_MAX_VALUE -
 	        (float)SLIDERS_MIN_VALUE);
-	int type = slider_index / 3;
-	int index = slider_index % 3;
+	int type = slider_index / aa_bell_get_mode_count(bell);
+	int index = slider_index % aa_bell_get_mode_count(bell);
 
 	if(index < aa_bell_get_mode_count(bell)) {
-		if(type == 0)
-			aa_bell_set_mode_freq(bell, index, value * 5000);
-		else if(type == 1)
-			aa_bell_set_angular_decay(bell, index, (1.0 - value) * 50);
-		else if(type == 2)
-			aa_bell_set_gain(bell, 0, index, value * 10);
+		if(type == 0) {
+			value = pow(value,2);
+			value *= 7000;
+			value += 100;
+			aa_bell_set_mode_freq(bell, index, value);
+		} else if(type == 1) {
+			value = pow(1.0-value,2) * 50;
+			aa_bell_set_angular_decay(bell, index, value);
+		} else if(type == 2) {
+			value = pow(value,3);
+			// value = value*1.1-0.05;
+			aa_bell_set_gain(bell, 0, index, value);
+		}
 
 		aa_bell_compute_reson_coeff(bell, index);
 		aa_bell_compute_location(bell, index);
