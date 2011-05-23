@@ -81,6 +81,8 @@ main(void) {
 	PABLIO_Stream *inStream = NULL;
 	bool useInStream = true;
 
+	useInStream = false; // Uncomment to enable audio input.
+
 	signal(SIGINT, &received_interrupt);
 
 	{
@@ -101,22 +103,21 @@ main(void) {
 	// for signalling when we want to interrupt.
 	pipe(gInterruptFDs);
 
-//	bell = aa_bell_create_from_file("glass.sy",bufferSize,srate);
-//	bell = aa_bell_create_from_file("wok.sy",bufferSize,srate);
-	bell = aa_bell_create(10, 1, bufferSize, srate);
+	sliders = sliders_create("/dev/tty.usbserial-pplug01", 0);
+
+	if(sliders) {
+		sliders_set_callback(sliders, &sliders_changed_callback, bell);
+
+		bell = aa_bell_create(10 , 1, bufferSize, srate);
+	} else {
+		fprintf(stderr, "Unable to make sliders object\nTrying sy/wok.sy instead...\n");
+
+		bell = aa_bell_create_from_file("sy/wok.sy",bufferSize,srate);
+	}
 
 	if(!bell) {
 		fprintf(stderr, "Unable to make bell object\n");
 		goto bail;
-	}
-
-	sliders = sliders_create("/dev/tty.usbserial-pplug01", 0);
-
-	if(!sliders) {
-		fprintf(stderr, "Unable to make sliders object\n");
-		goto bail;
-	} else {
-		sliders_set_callback(sliders, &sliders_changed_callback, bell);
 	}
 
 	OpenAudioStream(&outStream,
@@ -124,15 +125,23 @@ main(void) {
 		paFloat32,
 		PABLIO_WRITE | PABLIO_MONO);
 
-	if (useInStream)
+	if (useInStream) {
 		OpenAudioStream(&inStream, srate, paFloat32, PABLIO_READ | PABLIO_MONO);
+		if(!inStream) {
+			fprintf(stderr, "Unable to open input audio stream\n");
+		}
+	}
 
 	if(!outStream) {
 		fprintf(stderr, "Unable to open output audio stream\n");
 		goto bail;
 	}
 
-	aa_bell_add_energy(bell, 0.5, 0.002);
+	aa_bell_add_energy(bell, 0.01, 0.002);
+
+	fprintf(stderr, "Press spacebar to hit.\n");
+	fprintf(stderr, "Press 'x' to clear history.\n");
+	fprintf(stderr, "Press 'q' to quit.\n");
 
 	// select() based runloop
 	while(!gDidGetInterrupt) {
@@ -141,7 +150,7 @@ main(void) {
 			    ((long long)bufferSize * 1000000ll /
 			        (long long)srate) * 0.65
 		};
-		int fd = sliders_get_fd(sliders);
+		int fd = sliders?sliders_get_fd(sliders):-1;
 		fd_set readfs, exceptfs;
 		float buffer[bufferSize];
 		float total;
@@ -149,8 +158,10 @@ main(void) {
 		FD_ZERO(&readfs);
 		FD_ZERO(&exceptfs);
 
-		FD_SET(fd, &readfs);
-		FD_SET(fd, &exceptfs);
+		if(fd>0) {
+			FD_SET(fd, &readfs);
+			FD_SET(fd, &exceptfs);
+		}
 		FD_SET(0, &readfs);
 		FD_SET(0, &exceptfs);
 		FD_SET(gInterruptFDs[0], &readfs);
@@ -162,14 +173,14 @@ main(void) {
 		if(FD_ISSET(gInterruptFDs[0], &readfs))
 			break;
 
-		if (useInStream)
+		if (useInStream && inStream)
 			ReadAudioStream(inStream, aa_bell_get_cos_force_ptr(bell), bufferSize);
 
 		if(FD_ISSET(0, &readfs)) {
 			char c;
 			read(0, &c, 1);
 			if(c == ' ')
-				aa_bell_add_energy(bell, 0.5, 0.002);
+				aa_bell_add_energy(bell, 0.01, 0.002);
 			else if(c == 'q')
 				break;
 			else if(c == 'd')
@@ -177,12 +188,14 @@ main(void) {
 			else if(c == 'x')
 				aa_bell_clear_history(bell);
 		}
-		if(FD_ISSET(fd, &readfs))
-			if(sliders_process(sliders) != SLIDERS_STATUS_OK)
+		if(fd>0) {
+			if(FD_ISSET(fd, &readfs))
+				if(sliders_process(sliders) != SLIDERS_STATUS_OK)
+					break;
+			if(FD_ISSET(fd, &exceptfs)) {
+				fprintf(stderr, "select() got error on fd %d\n", fd);
 				break;
-		if(FD_ISSET(fd, &exceptfs)) {
-			fprintf(stderr, "select() got error on fd %d\n", fd);
-			break;
+			}
 		}
 
 		total = aa_bell_compute_sound_buffer(bell, buffer);
