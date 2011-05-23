@@ -61,6 +61,8 @@ void aa_bell_compute_filter(aa_bell_t self);
 double aa_bell_compute_sound_buffer(
 	aa_bell_t self, float *output);
 
+void aa_bell_clear_history(aa_bell_t self);
+
 void aa_bell_dump(
 	aa_bell_t self, FILE* outfile);
 

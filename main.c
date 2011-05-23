@@ -45,7 +45,7 @@ sliders_changed_callback(
 			value += 100;
 			aa_bell_set_mode_freq(bell, index, value);
 		} else if(type == 1) {
-			value = pow(1.0-value,2) * 50;
+			value = pow(1.0-value,2) * 50 + 0.6;
 			aa_bell_set_angular_decay(bell, index, value);
 		} else if(type == 2) {
 			value = pow(value,3);
@@ -78,6 +78,8 @@ main(void) {
 	sliders_t sliders;
 	aa_bell_t bell;
 	PABLIO_Stream *outStream = NULL;
+	PABLIO_Stream *inStream = NULL;
+	bool useInStream = true;
 
 	signal(SIGINT, &received_interrupt);
 
@@ -122,6 +124,9 @@ main(void) {
 		paFloat32,
 		PABLIO_WRITE | PABLIO_MONO);
 
+	if (useInStream)
+		OpenAudioStream(&inStream, srate, paFloat32, PABLIO_READ | PABLIO_MONO);
+
 	if(!outStream) {
 		fprintf(stderr, "Unable to open output audio stream\n");
 		goto bail;
@@ -157,6 +162,9 @@ main(void) {
 		if(FD_ISSET(gInterruptFDs[0], &readfs))
 			break;
 
+		if (useInStream)
+			ReadAudioStream(inStream, aa_bell_get_cos_force_ptr(bell), bufferSize);
+
 		if(FD_ISSET(0, &readfs)) {
 			char c;
 			read(0, &c, 1);
@@ -166,6 +174,8 @@ main(void) {
 				break;
 			else if(c == 'd')
 				aa_bell_dump(bell, stdout);
+			else if(c == 'x')
+				aa_bell_clear_history(bell);
 		}
 		if(FD_ISSET(fd, &readfs))
 			if(sliders_process(sliders) != SLIDERS_STATUS_OK)
